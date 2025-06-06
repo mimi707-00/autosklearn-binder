@@ -1,0 +1,46 @@
+#import libraries
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+import matplotlib.pyplot as plt
+from sklearn.tree import plot_tree
+from sklearn import tree
+
+#load cleaned dataset
+from google.colab import files
+uploaded = files.upload()
+df = pd.read_csv('cleaned_ktmb_data.csv')
+
+#prepare features and label
+# Define features (X) and target label (y)
+features = ['ridership', 'hour', 'day_of_week', 'is_holiday', 'station_pair_encoded']
+X = df[features]
+y = df['peak_label']
+
+#split data to train and test
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+#train the decision tree model
+model = DecisionTreeClassifier(max_depth=3, random_state=42)
+model.fit(X_train, y_train)
+#max_depth = 10 to avoid overfitting
+
+#evaluate the model
+#make predictions
+y_pred = model.predict(X_test)
+
+# Evaluation metrics
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+print("\nAccuracy:", accuracy_score(y_test, y_pred))
+
+#compare training vs test accuracy
+print("Training Accuracy:", model.score(X_train, y_train))
+print("Testing Accuracy :", model.score(X_test, y_test))
+
+#Visualize the Decision Tree
+plt.figure(figsize=(15,10))
+tree.plot_tree(model, feature_names=X.columns, class_names=['Off-Peak', 'Peak'], filled=True)
+plt.title("Decision Tree for Peak Classification")
+plt.show()
